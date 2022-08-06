@@ -1,0 +1,22 @@
+mode: set
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo_mysql.go:11.52,13.2 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo_mysql.go:15.79,20.16 3 1
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo_mysql.go:24.2,24.24 1 1
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo_mysql.go:27.2,27.15 1 1
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo_mysql.go:20.16,22.3 1 1
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo_mysql.go:24.24,26.3 1 1
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo_mysql.go:30.83,37.16 2 1
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo_mysql.go:40.2,45.16 3 1
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo_mysql.go:37.16,39.3 1 1
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:21.44,25.2 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:27.80,30.9 3 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:33.2,33.24 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:36.2,36.15 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:30.9,32.3 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:33.24,35.3 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:39.84,50.9 7 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:53.2,53.24 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:56.2,56.15 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:50.9,52.3 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:53.24,55.3 1 0
+gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user/repo.go:59.37,64.2 4 0

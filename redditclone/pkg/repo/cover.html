@@ -1,0 +1,661 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>repo: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/repo/PostF.go (98.2%)</option>
+				
+				<option value="file1">gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/repo/repo.go (0.0%)</option>
+				
+				<option value="file2">gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/repo/repo_mongo.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package repo
+
+import (
+        "context"
+        "gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/comment"
+        "gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/post"
+        "gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/user"
+        "gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/vote"
+        "go.mongodb.org/mongo-driver/bson"
+        "log"
+        "math"
+        "strconv"
+        "time"
+)
+
+type PostDB struct {
+        data      post.PostDataFunctional
+        lastIndex int64
+}
+
+func NewPostDB(db post.PostDataFunctional) *PostDB <span class="cov8" title="1">{
+        return &amp;PostDB{data: db,
+                lastIndex: db.Len(),
+        }
+}</span>
+
+func (m *PostDB) Add(c *post.Post) (*post.Post, error) <span class="cov8" title="1">{
+        c.Created = time.Now().Format(time.RFC3339)
+        c.UpvotePercentage = 0
+        c.Views = 0
+        c.Score = 0
+        c.AuthorID = c.Author.Login
+        c.Comments = []comment.Comment{}
+        c.Votes = []vote.Vote{}
+        c.ID = strconv.Itoa(int(m.lastIndex + 1))
+        _, err := m.data.Add(c)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Println("err in Add PostDB:", err)
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return c, nil</span>
+}
+func (m *PostDB) Get(id string) (*post.Post, error) <span class="cov8" title="1">{
+        return m.data.Get(id)
+}</span>
+func (m *PostDB) GetAll() ([]*post.Post, error) <span class="cov8" title="1">{
+        return m.data.GetFilter(context.TODO(), bson.M{})
+}</span>
+func (m *PostDB) GetInCategory(c string) ([]*post.Post, error) <span class="cov8" title="1">{
+        return m.data.GetFilter(context.TODO(), bson.M{"category": c})
+}</span>
+func (m *PostDB) GetFromUser(userName string) ([]*post.Post, error) <span class="cov8" title="1">{
+        return m.data.GetFilter(context.TODO(), bson.M{"authorID": userName})
+}</span>
+func (m *PostDB) AddComment(id string, text string, author *user.User) (*post.Post, error) <span class="cov8" title="1">{
+        post, err := m.Get(id)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Println("err in AddComment:", err)
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">post.Comments, err = comment.Create(post.Comments, text, author)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return m.data.AddComm(post)</span>
+}
+func (m *PostDB) DeleteComment(idPost string, idComment int64) (*post.Post, error) <span class="cov8" title="1">{
+        post, err := m.Get(idPost)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Println(err, "err in AddComment")
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">post.Comments = comment.Delete(post.Comments, idComment)
+        return m.data.DeleteComm(post)</span>
+}
+func (m *PostDB) UpdateVote(coin int, idPost string, author *user.User) (*post.Post, error) <span class="cov8" title="1">{
+        ans, err := m.Get(idPost)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Println(err, "err in UpdateVote:", err)
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">c, err := vote.MakeVoteArr(ans.Votes, coin, author)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Println("err in UpdVote, aft makeVote:", err)
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">ans.Votes = c
+        UpdateScore(ans)
+        return m.data.UpVote(ans)</span>
+}
+func (m *PostDB) Delete(id string) (bool, error) <span class="cov8" title="1">{
+        return m.data.Delete(id)
+}</span>
+
+func UpdateScore(post *post.Post) <span class="cov8" title="1">{
+        score := 0
+        upvotes := 0
+        votes := len(post.Votes)
+        for _, item := range post.Votes </span><span class="cov8" title="1">{
+                score += item.Vote
+                if item.Vote == 1 </span><span class="cov8" title="1">{
+                        upvotes++
+                }</span>
+        }
+        <span class="cov8" title="1">post.Score = score
+        if votes == 0 </span><span class="cov8" title="1">{
+                post.UpvotePercentage = 0
+                return
+        }</span>
+        <span class="cov8" title="1">post.UpvotePercentage = int(math.Abs(float64(upvotes) / float64(votes) * 100))</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package repo
+
+import (
+        "errors"
+        "gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/post"
+        "sync"
+)
+
+var (
+        ErrNoPost = errors.New("no post found")
+)
+
+type PostMemoryRepo struct {
+        lastIndex int
+        data      []*post.Post
+        mutex     sync.Mutex
+}
+
+func NewMemoryRepo() *PostMemoryRepo <span class="cov0" title="0">{
+        return new(PostMemoryRepo)
+}</span>
+
+/*
+func (repo *PostMemoryRepo) Add(c *Post) (*Post, error) {
+        repo.mutex.Lock()
+        c.Created = time.Now().Format(time.RFC3339)
+        c.UpvotePercentage = 100
+        c.Views = 0
+        c.Score = 1
+        c.Comments = *comment.NewMemoryRepo()
+        c.Votes = *vote.NewMemoryRepo()
+        repo.lastIndex++
+        repo.data = append(repo.data, c)
+        repo.mutex.Unlock()
+        u, err := repo.Get(c.ID)
+        if err != nil {
+                log.Println(err)
+        }
+        return u, nil
+}
+func (repo *PostMemoryRepo) Get(id string) (*Post, error) {
+        repo.mutex.Lock()
+        defer repo.mutex.Unlock()
+        for _, elem := range repo.data {
+                if elem.ID == id {
+                        return elem, nil
+                }
+        }
+        return nil, ErrNoPost
+}
+
+func (repo *PostMemoryRepo) GetAll() ([]*Post, error) {
+        arr := make([]*Post, 0, 10)
+        repo.mutex.Lock()
+        defer repo.mutex.Unlock()
+        arr = append(arr, repo.data...)
+        return arr, nil
+}
+
+func (repo *PostMemoryRepo) GetInCategory(category string) ([]*Post, error) {
+        arr := make([]*Post, 0, 10)
+        repo.mutex.Lock()
+        defer repo.mutex.Unlock()
+        for _, elem := range repo.data {
+                if elem.Category == category {
+                        arr = append(arr, elem)
+                }
+        }
+        return arr, nil
+}
+func (repo *PostMemoryRepo) AddComment(num int64, text string, author *user.User) (*Post, error) {
+        idPost := strconv.Itoa(int(num))
+        post, err := repo.Get(idPost)
+        if err != nil {
+                log.Println("err in AddComment:", err)
+        }
+        repo.mutex.Lock()
+        defer repo.mutex.Unlock()
+        _, err = post.Comments.Create(text, author)
+        if err != nil {
+                return nil, err
+        }
+        return post, nil
+}
+
+func (repo *PostMemoryRepo) DeleteComment(num int64, idComment int64) (*Post, error) {
+        idPost := strconv.Itoa(int(num))
+        post, err := repo.Get(idPost)
+        if err != nil {
+                log.Println(err, "err in AddComment")
+        }
+        repo.mutex.Lock()
+        defer repo.mutex.Unlock()
+        post.Comments.Delete(idComment)
+        return post, nil
+}
+
+func (repo *PostMemoryRepo) UpdateVote(vote int, num int64, author *user.User) (*Post, error) {
+        idPost := strconv.Itoa(int(num))
+        post, err := repo.Get(idPost)
+        if err != nil {
+                log.Println(err, "err in UpdateVote:", err)
+        }
+        repo.mutex.Lock()
+        _, err = post.Votes.Make(vote, author)
+        if err != nil {
+                return nil, err
+        }
+        repo.mutex.Unlock()
+        repo.UpdateScore(post)
+        return post, nil
+}
+func PreSendingConvert(repo []*Post) []*PostForSending {
+        arr := make([]*PostForSending, 0, 10)
+        for _, elem := range repo {
+                arr = append(arr, elem.Convert())
+        }
+        return arr
+}
+func (repo *PostMemoryRepo) UpdateScore(post *Post) {
+        score := 0
+        upvotes := 0
+        votes := post.Votes.NumVotes()
+        for _, item := range post.Votes.GetAll() {
+                score += item.Vote
+                if item.Vote == 1 {
+                        upvotes++
+                }
+        }
+        repo.mutex.Lock()
+        defer repo.mutex.Unlock()
+        post.Score = score
+        if votes == 0 {
+                post.UpvotePercentage = 0
+                return
+        }
+        post.UpvotePercentage = int(math.Abs(float64(upvotes) / float64(votes) * 100))
+}
+func (repo *PostMemoryRepo) Delete(id string) (bool, error) {
+        var k int
+        repo.mutex.Lock()
+        defer repo.mutex.Unlock()
+        for i, item := range repo.data {
+                if item.ID == id {
+                        k = i
+                        break
+                }
+        }
+        repo.data = append(repo.data[:k], repo.data[k+1:]...)
+        return true, nil
+}
+func (repo *PostMemoryRepo) GetFromUser(userID int64) ([]*Post, error) {
+        arr := make([]*Post, 0, 10)
+        repo.mutex.Lock()
+        defer repo.mutex.Unlock()
+        for _, elem := range repo.data {
+                if elem.Author.ID == userID {
+                        arr = append(arr, elem)
+                }
+        }
+        return arr, nil
+}
+*/
+//
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package repo
+
+import (
+        "context"
+        "gitlab.com/mailru-go/lectures-2022-1/06_databases/99_hw/redditclone/pkg/post"
+        "go.mongodb.org/mongo-driver/bson"
+        "go.mongodb.org/mongo-driver/mongo"
+        "log"
+)
+
+type PostMongoRepo struct {
+        data *mongo.Collection
+        //lastIndex int64
+}
+
+func NewMongoRepo(db *mongo.Collection) *PostMongoRepo <span class="cov0" title="0">{
+        return &amp;PostMongoRepo{data: db}
+}</span>
+
+func (repo *PostMongoRepo) Len() int64 <span class="cov0" title="0">{
+        len, err := repo.data.CountDocuments(context.TODO(), bson.M{})
+        if err != nil </span><span class="cov0" title="0">{
+                log.Println("err in Len:", err)
+                return -1
+        }</span>
+        <span class="cov0" title="0">return len</span>
+}
+
+func (repo *PostMongoRepo) Add(c *post.Post) (*post.Post, error) <span class="cov0" title="0">{
+        _, err := repo.data.InsertOne(context.TODO(), c)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Println(err)
+        }</span>
+        <span class="cov0" title="0">return c, nil</span>
+}
+
+func (repo *PostMongoRepo) Get(id string) (*post.Post, error) <span class="cov0" title="0">{
+        post := &amp;post.Post{}
+        err := repo.data.FindOne(context.TODO(), bson.M{"id": id}).Decode(&amp;post)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Println("err in Get Post:", err)
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return post, nil</span>
+}
+
+func (repo *PostMongoRepo) GetFilter(ctx context.Context, filter interface{}) ([]*post.Post, error) <span class="cov0" title="0">{
+        var arr []*post.Post
+        cur, err := repo.data.Find(ctx, filter)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Println("err in read from DB:", err)
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">for cur.Next(context.TODO()) </span><span class="cov0" title="0">{
+                var elem post.Post
+                err := cur.Decode(&amp;elem)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Fatal(err)
+                }</span>
+                <span class="cov0" title="0">arr = append(arr, &amp;elem)</span>
+        }
+        <span class="cov0" title="0">if err := cur.Err(); err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+        <span class="cov0" title="0">cur.Close(context.TODO())
+        return arr, nil</span>
+}
+
+func (repo *PostMongoRepo) AddComm(post *post.Post) (*post.Post, error) <span class="cov0" title="0">{
+        _, err := repo.data.UpdateOne(context.TODO(), bson.M{"id": post.ID}, bson.D{
+                {"$set", bson.D{{"comments", post.Comments}}},
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                log.Println("err in update bd in AddComment:", err)
+        }</span>
+        <span class="cov0" title="0">return post, nil</span>
+}
+func (repo *PostMongoRepo) DeleteComm(post *post.Post) (*post.Post, error) <span class="cov0" title="0">{
+        _, err := repo.data.ReplaceOne(context.TODO(), bson.M{"id": post.ID}, &amp;post)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Println("err in update bd in DelateComment:", err)
+        }</span>
+        <span class="cov0" title="0">return post, nil</span>
+}
+
+func (repo *PostMongoRepo) UpVote(ans *post.Post) (*post.Post, error) <span class="cov0" title="0">{
+        res := repo.data.FindOneAndUpdate(context.TODO(), bson.M{"id": ans.ID}, bson.D{
+                {"$set", bson.M{"votes": ans.Votes, "score": ans.Score, "upvotePercentage": ans.UpvotePercentage}},
+        })
+        if res.Err() != nil </span><span class="cov0" title="0">{
+                log.Println(res.Err())
+                return nil, res.Err()
+        }</span>
+        <span class="cov0" title="0">return ans, nil</span>
+}
+
+func (repo *PostMongoRepo) Delete(id string) (bool, error) <span class="cov0" title="0">{
+        _, err := repo.data.DeleteOne(context.TODO(), bson.M{"id": id})
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+        <span class="cov0" title="0">return true, nil</span>
+}
+
+/*
+func (repo *PostMongoRepo) UpdateScore(post *Post){
+        score := 0
+        upvotes := 0
+        votes := len(post.Votes)
+        for _, item := range post.Votes {
+                score += item.Vote
+                if item.Vote == 1 {
+                        upvotes++
+                }
+        }
+        post.Score = score
+        if votes == 0 {
+                post.UpvotePercentage = 0
+                return
+        }
+        post.UpvotePercentage = int(math.Abs(float64(upvotes) / float64(votes) * 100))
+}
+
+
+
+func (repo *PostMongoRepo) AddComment(num string, text string, author *user.User) (*Post, error) {
+        post, err := repo.Get(num)
+        if err != nil {
+                log.Println("err in AddComment:", err)
+        }
+
+        post.Comments, err = comment.Create(post.Comments, text, author)
+        if err != nil {
+                return nil, err
+        }
+        _, err = repo.data.UpdateOne(context.TODO(), bson.M{"id": post.ID}, bson.D{
+                {"$set", bson.D{{"comments", post.Comments}}},
+        })
+        if err != nil {
+                log.Println("err in update bd in AddComment:", err)
+        }
+        return post, nil
+}
+
+func (repo *PostMongoRepo) DeleteComment(idPost string, idComment int64) (*Post, error) {
+        post, err := repo.Get(idPost)
+        if err != nil {
+                log.Println(err, "err in AddComment")
+        }
+
+        post.Comments = comment.Delete(post.Comments, idComment)
+        _, err = repo.data.ReplaceOne(context.TODO(), bson.M{"id": post.ID}, &amp;post)
+        if err != nil {
+                log.Println("err in update bd in DelateComment:", err)
+        }
+        return post, nil
+}
+
+func (repo *PostMongoRepo) UpdateVote(coin int, idPost string, author *user.User) (*Post, error) {
+        var ans *Post
+        err := repo.data.FindOne(context.TODO(), bson.M{"id": idPost}).Decode(&amp;ans)
+        if err != nil {
+                log.Println(err, "err in UpdateVote:", err)
+                return nil, err
+        }
+        c, err := vote.MakeVoteArr(ans.Votes, coin, author)
+        if err != nil {
+                log.Println("err in UpdVote, aft makeVote:", err)
+                return nil, err
+        }
+        ans.Votes = c
+        repo.UpdateScore(ans)
+        res := repo.data.FindOneAndUpdate(context.TODO(), bson.M{"id": ans.ID}, bson.D{
+                {"$set", bson.M{"votes": ans.Votes, "score": ans.Score, "upvotePercentage": ans.UpvotePercentage}},
+        })
+        if res.Err() != nil {
+                log.Println(res.Err())
+                return nil, res.Err()
+        }
+
+        return ans, nil
+}
+func (repo *PostMongoRepo) UpdateScore(post *Post){
+        score := 0
+        upvotes := 0
+        votes := len(post.Votes)
+        for _, item := range post.Votes {
+                score += item.Vote
+                if item.Vote == 1 {
+                        upvotes++
+                }
+        }
+        post.Score = score
+        if votes == 0 {
+                post.UpvotePercentage = 0
+                return
+        }
+        post.UpvotePercentage = int(math.Abs(float64(upvotes) / float64(votes) * 100))
+}
+
+
+
+func (repo *PostMongoRepo) GetFromUser(userID string) ([]*Post, error) {
+        var arr []*Post
+        cur, err := repo.data.Find(context.TODO(), bson.M{"authorID": userID})
+        if err != nil {
+                log.Println("err in read from DB:", err)
+                return nil, err
+        }
+
+        for cur.Next(context.TODO()) {
+                var elem Post
+                err := cur.Decode(&amp;elem)
+                if err != nil {
+                        log.Fatal(err)
+                }
+                arr = append(arr, &amp;elem)
+        }
+
+        if err := cur.Err(); err != nil {
+                log.Fatal(err)
+        }
+        cur.Close(context.TODO())
+        return arr, nil
+}
+
+func (repo *PostMongoRepo) GetAll() ([]*Post, error) {
+        var arr []*Post
+        cur, err := repo.data.Find(context.TODO(), bson.M{})
+        if err != nil {
+                log.Println("err in read from DB:", err)
+                return nil, err
+        }
+        for cur.Next(context.TODO()) {
+                var elem Post
+                err := cur.Decode(&amp;elem)
+                if err != nil {
+                        log.Fatal(err)
+                }
+
+                arr = append(arr, &amp;elem)
+        }
+
+        if err := cur.Err(); err != nil {
+                log.Fatal(err)
+        }
+        cur.Close(context.TODO())
+        return arr, nil
+}
+func (repo *PostMongoRepo) GetInCategory(category string) ([]*Post, error) {
+        var arr []*Post
+        cur, err := repo.data.Find(context.TODO(), bson.M{"category": category})
+        if err != nil {
+                log.Println("err in read from DB:", err)
+                return nil, err
+        }
+        for cur.Next(context.TODO()) {
+                var elem Post
+                err := cur.Decode(&amp;elem)
+                if err != nil {
+                        log.Fatal(err)
+                }
+
+                arr = append(arr, &amp;elem)
+        }
+
+        if err := cur.Err(); err != nil {
+                log.Println(err)
+                return nil, err
+        }
+        cur.Close(context.TODO())
+        return arr, nil
+}
+
+*/
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
